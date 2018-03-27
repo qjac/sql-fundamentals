@@ -25,7 +25,7 @@ export const ORDER_COLUMNS = ['*'];
  * @type {Readonly<OrderCollectionOptions>}
  */
 const DEFAULT_ORDER_COLLECTION_OPTIONS = Object.freeze(
-  /** @type {OrderCollectionOptions}*/ ({
+  /** @type {OrderCollectionOptions}*/({
     order: 'asc',
     page: 1,
     perPage: 20,
@@ -49,10 +49,32 @@ export async function getAllOrders(opts = {}) {
     ...opts
   };
 
+  /* from previous excercise
+  
+  if (options.filter) {
+    whereClause = sql`WHERE (lower(contactname) LIKE lower('%${options.filter}%') )
+     OR (lower(companyname) LIKE lower('%${options.filter}%'))`;
+  }
+  return await db.all(sql`
+SELECT ${ALL_CUSTOMERS_COLUMNS.join(',')}
+FROM Customer ${whereClause}`);
+} */
+  /* 
+  ORDER BY ${opts.sort} ${opts.order}
+  */
   const db = await getDb();
+  let sortClause = '';
+  if (options.sort && options.order) {
+    sortClause = sql`ORDER BY ${options.sort} ${options.order.toUpperCase()}`;
+  }
+  let paginationClause = '';
+  if (typeof options.page !== 'undefined' && options.perPage) {
+    paginationClause = sql`LIMIT`;
+  }
+
   return await db.all(sql`
 SELECT ${ALL_ORDERS_COLUMNS.join(',')}
-FROM CustomerOrder`);
+FROM CustomerOrder ${whereClause} ${sortClause} ${paginationClause}`);
 }
 
 /**
